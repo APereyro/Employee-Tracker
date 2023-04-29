@@ -1,13 +1,13 @@
-const { createConnection } = require(mysql2);
+const { createConnection } = require('mysql2');
 
 const connection = createConnection(
     {
     host: 'localhost',
     user: 'root',
     password: 'rootroot',
-    database: 'employee_db'
+    database: 'employees'
   },
-  console.log(`Connected to the Employee database.`)
+  console.log(`Connected to the Employees database.`)
 );
 
 connection.connect (function (err) {
