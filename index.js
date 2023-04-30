@@ -106,7 +106,38 @@ function loadMainPrompts() {
   });
           break;
         case 'Update An Employee Role':
-          updateEmployeeRole()
+          db.query(getAllEmployees, (err, employee) => {
+            if (err) throw err;
+          db.query(getAllRoles, (err, role) => {
+            if (err) throw err;
+              prompt([
+              {
+                type: "list",
+                name: "employee_role",
+                message: "which employees role would you like to update?",
+                choices: employee.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id }))
+              },
+              {
+                type: "list",
+                name: "role_employee",
+                message: "Which role would you like to assign the selected employee",
+                choices: role.map(role => ({ name: role.title, value: role.id }))
+              },
+            ]).then((answers) => {
+              db.query(updateEmployeeRole,
+                [
+                  answers.employee_role,
+                  answers.role_employee,
+                ],
+                (err, results) => {
+                  if (err) throw err;
+                  console.log("Employee Role Updated!");
+                  loadMainPrompts();
+                }
+              );
+            });
+          });
+        });
           break;
         case 'View All Roles':
           db.query(getAllRoles, (err, results) => {
@@ -115,19 +146,71 @@ function loadMainPrompts() {
             loadMainPrompts();
           });
           break;
-        case 'Add A Role':
-          addRole()
-          break;
-        case 'View All Departments':
-          db.query(getAllDepartments, (err, results) => {
-            if (err) throw err;
-            console.table(results);
-            loadMainPrompts();
-          });
-          break;
-        case 'Add A Department':
-          addDepartment()
-          break;
+          case 'Add A Role':
+            db.query(getAllDepartments, (err, departments) => {
+              if (err) throw err;
+              prompt([
+                {
+                  type: "input",
+                  name: "role_name",
+                  message: "What is the name of the role?",
+                },
+                {
+                  type: "input",
+                  name: "salary",
+                  message: "What is the salary of this role?",
+                },
+                {
+                  type: "list",
+                  name: "department_id",
+                  message: "What department does this role belong to?",
+                  choices: departments.map(department => ({ name: department.name, value: department.id }))
+                },
+              ]).then((answers) => {
+                db.query(
+                  addRole,
+                  [
+                    answers.role_name,
+                    answers.salary,
+                    answers.department_id,
+                  ],
+                  (err, results) => {
+                    if (err) throw err;
+                    console.log("Role added!");
+                    loadMainPrompts();
+                  }
+                );
+              });
+            });
+            break;
+          case 'View All Departments':
+            db.query(getAllDepartments, (err, results) => {
+              if (err) throw err;
+              console.table(results);
+              loadMainPrompts();
+            });
+            break;
+          case 'Add A Department':
+            prompt([
+              {
+                type: "input",
+                name: "department_name",
+                message: "What is the name of the new department?",
+              },
+            ]).then((answers) => {
+              db.query(
+                addDepartment,
+                [
+                  answers.department_name,
+                ],
+                (err, results) => {
+                  if (err) throw err;
+                  console.log("Department added!");
+                  loadMainPrompts();
+                }
+              );
+            });
+            break;
         case 'Quit':
           process.exit(0);
       }
