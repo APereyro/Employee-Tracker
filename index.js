@@ -126,8 +126,8 @@ function loadMainPrompts() {
             ]).then((answers) => {
               db.query(updateEmployeeRole,
                 [
-                  answers.employee_role,
                   answers.role_employee,
+                  answers.employee_role,
                 ],
                 (err, results) => {
                   if (err) throw err;
